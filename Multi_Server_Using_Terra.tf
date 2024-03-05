@@ -2,56 +2,53 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "5.38.0"
+      version = "5.39.1"
     }
   }
 }
-
+provider "aws" {
+  region = var.aws_region
+}
 
 terraform {
   backend "s3" {
-    bucket = "terraformconfigdata"
-    key    = "terraformconfigdata/TerraData/terraform.tfstate"
-    region = "us-east-1"
-    encrypt = true
+    bucket         = "terraformconfigdata"
+    key            = "terraform.tfstate"
+    region         = var.aws_region
+    encrypt        = true
+    dynamodb_table = "terraform_locks"
   }
 }
 
-provider "aws" {
-  region = var.region
-}
-
-
-resource "aws_instance" "ubuntu_servers" {
-  count = var.count
-
-  ami           = "ami-07d9b9ddc6cd8dd30"  
-  
-  key_name = var.key_name
+resource "aws_instance" "ubuntu_instance" {
+  count         = var.instance_count
+  ami           = var.ami_id
+  instance_type = var.instance_type
 
   tags = {
-    Name = "My-server-${count.index + 1}"
+    Name = "ubuntu-instance-${count.index + 1}"
   }
 }
 
-
-variable "region" {
-  description = "The region for the instances"
+variable "aws_region" {
+  description = "The region where resources will be created."
   default     = "us-east-1"
 }
 
+variable "instance_count" {
+  description = "Number of Ubuntu instances to create."
+  type        = number
+  default     = 5
+}
+
+variable "ami_id" {
+  description = "The AMI ID for Ubuntu in the specified region."
+  default     = "ami-07d9b9ddc6cd8dd30" 
+}
+
 variable "instance_type" {
-  description = "The type of instances to launch"
+  description = "The type of EC2 instance to launch."
   default     = "t2.micro"
 }
 
-variable "key_name" {
-  description = "The name of the key pair to use for the instances"
-  default     = "new"
-}
-
-variable "count" {
-  description = "The number of Ubuntu servers to create"
-  default     = 5
-}
 
