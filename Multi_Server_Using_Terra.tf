@@ -11,7 +11,7 @@ terraform {
 terraform {
   backend "s3" {
     bucket = "terraformconfigdata"
-    #key    = "path/del/estado/terraform.tfstate"
+    key    = "terraformconfigdata/TerraData/terraform.tfstate"
     region = "us-east-1"
     encrypt = true
   }
